@@ -131,5 +131,5 @@ if __name__ == "__main__":
     # accept_df = make_large_df(path='accept/', years=[2016])
     # reject_df = make_large_df(path='reject/', years=[2016])
     # print 'writing csvs...'
-    # accept_df.to_csv('LoanStats_2016.csv', index=False)
-    # reject_df.to_csv('RejectStats_2016.csv', index=False)
+    # accept_df.to_csv('2016_data/LoanStats_2016.csv', index=False)
+    # reject_df.to_csv('2016_data/RejectStats_2016.csv', index=False)
