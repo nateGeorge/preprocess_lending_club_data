@@ -18,8 +18,10 @@ in pd.read_csv())
 '''
 
 import pandas as pd
+import numpy as np
 from glob import iglob
 import feather as ft
+import re
 
 def make_large_df(path='accept/', years=None):
     """
@@ -80,12 +82,28 @@ def make_large_df(path='accept/', years=None):
 
     return full_df
 
+
+def convert_pct(x):
+    """
+    Converts string with % to a float, handles 'None's.
+    """
+    if x is None or pd.isnull(x):
+        return None
+
+    return float(re.sub('%', '', x))
+
+
 if __name__ == "__main__":
     # this makes a dataframe with all csvs
     accept_df = make_large_df(path='accept/')
     reject_df = make_large_df(path='reject/')
-    # accept_df.reset_index(inplace=True, drop=True)
-    # reject_df.reset_index(inplace=True, drop=True)
+    # I really don't think anyone's going to use the url...
+    accept_df.drop('url', axis=1, inplace=True)
+    # remove % and convert to float (numeric)
+    accept_df['int_rate'] = accept_df['int_rate'].apply(lambda x: float(re.sub('%', '', x)))
+    accept_df['revol_util'] = accept_df['revol_util'].apply(lambda x: convert_pct(x))
+    accept_df.reset_index(inplace=True, drop=True)
+    reject_df.reset_index(inplace=True, drop=True)
 
     # to check out info do this:
     # accept_df.info(verbose=True, null_counts=True)
@@ -106,8 +124,8 @@ if __name__ == "__main__":
     # reject_df.to_msgpack('test.msg')
 
     # takes a LOOOONG time.  many minutes
-    accept_df.to_csv('accepted_2007_to_2016.csv.gz', index=False, compression='gzip')
-    reject_df.to_csv('rejected_2007_to_2016.csv.gz', index=False, compression='gzip')
+    accept_df.to_csv('full_data/accepted_2007_to_2016.csv.gz', index=False, compression='gzip')
+    reject_df.to_csv('full_data/rejected_2007_to_2016.csv.gz', index=False, compression='gzip')
 
     # makes a 2012-2016 dataframe for accepted, 2013-2016 for rejected
     # accept_df = make_large_df(path='accept/', years=[2016])
