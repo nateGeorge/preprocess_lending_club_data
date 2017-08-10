@@ -1,9 +1,11 @@
-# folders with large files
+# folders with large files and large files
 2016_data/
 accept/
 full_data/
 reject/
 *.csv.gz
+*.zip
+*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
