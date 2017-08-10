@@ -1,6 +1,6 @@
 # preprocess_lending_club_data
 Pre-processes lending club loan data and concatenates into one large file.
-This was made for publishing the dataset on [Kaggle](http://www.kaggle.com).
+This was made for publishing the dataset on [Kaggle](http://www.kaggle.com).  The Kaggle dataset/kernels are [here](https://www.kaggle.com/wordsforthewise/lending-club).
 
 # Instructions for use
 This was all done on Ubuntu 16.0.2.  Other operating systems are not currently supported.
