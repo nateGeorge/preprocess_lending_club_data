@@ -82,7 +82,8 @@ if __name__ == "__main__":
     accept_df = make_large_df(path='accept/')
     reject_df = make_large_df(path='reject/')
     # I really don't think anyone's going to use the url...
-    accept_df.drop('url', axis=1, inplace=True)
+    # but will leave it in for completeness
+    # accept_df.drop('url', axis=1, inplace=True)
     # remove % and convert to float (numeric)
     accept_df['int_rate'] = accept_df['int_rate'].apply(lambda x: convert_pct(x))
     accept_df['revol_util'] = accept_df['revol_util'].apply(lambda x: convert_pct(x))
@@ -98,9 +99,9 @@ if __name__ == "__main__":
         os.mkdir('full_data')
 
     print('writing accepted file...')
-    accept_df.to_csv('full_data/accepted_2007_to_2017.csv.gz', index=False, compression='gzip')
+    accept_df.to_csv('full_data/accepted_2007_to_2018Q3.csv.gz', index=False, compression='gzip')
     print('writing rejected file...')
-    reject_df.to_csv('full_data/rejected_2007_to_2017.csv.gz', index=False, compression='gzip')
+    reject_df.to_csv('full_data/rejected_2007_to_2018Q3.csv.gz', index=False, compression='gzip')
 
     # makes a 2012-2016 dataframe for accepted, 2013-2016 for rejected
     # accept_df = make_large_df(path='accept/', years=[2016])
