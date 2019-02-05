@@ -69,7 +69,11 @@ def convert_pct(x):
     return float(re.sub('%', '', x))
 
 
-if __name__ == "__main__":
+def create_full_csv_files():
+    """
+    creates full csv files from individual files
+    """
+
     # this makes a dataframe with all csvs
     accept_df = make_large_df(path='accept/')
     reject_df = make_large_df(path='reject/')
@@ -90,10 +94,12 @@ if __name__ == "__main__":
     if not os.path.exists('full_data'):
         os.mkdir('full_data')
 
-    print('writing accepted file...')
-    accept_df.to_csv('full_data/accepted_2007_to_2018Q3.csv.gz', index=False, compression='gzip')
-    print('writing rejected file...')
-    reject_df.to_csv('full_data/rejected_2007_to_2018Q3.csv.gz', index=False, compression='gzip')
+    # TODO: get latest file and use to change filename to latest
+    print('update code: get latest file and use in filenames')
+    # print('writing accepted file...')
+    # accept_df.to_csv('full_data/accepted_2007_to_2018Q3.csv.gz', index=False, compression='gzip')
+    # print('writing rejected file...')
+    # reject_df.to_csv('full_data/rejected_2007_to_2018Q3.csv.gz', index=False, compression='gzip')
 
     # makes a 2012-2016 dataframe for accepted, 2013-2016 for rejected
     # accept_df = make_large_df(path='accept/', years=[2016])
@@ -101,3 +107,6 @@ if __name__ == "__main__":
     # print 'writing csvs...'
     # accept_df.to_csv('2016_data/LoanStats_2016.csv', index=False)
     # reject_df.to_csv('2016_data/RejectStats_2016.csv', index=False)
+
+if __name__ == "__main__":
+    create_full_csv_files()
