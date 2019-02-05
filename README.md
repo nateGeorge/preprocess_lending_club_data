@@ -3,7 +3,7 @@ Pre-processes lending club loan data and concatenates into one large file.
 This was made for publishing the dataset on [Kaggle](http://www.kaggle.com).  The Kaggle dataset/kernels are [here](https://www.kaggle.com/wordsforthewise/lending-club).
 
 # Instructions for use
-This was all done on Ubuntu 16.0.2.  Other operating systems are not currently supported.
+This was all done on Ubuntu 16.0.2.  Other operating systems may or may not work.
 
 
 1. First, download all data from [here](https://www.lendingclub.com/info/download-data.action) then move it to the main directory of the cloned repo.  In the bash shell, run `unzip_files.sh`.  You may need to do
