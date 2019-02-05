@@ -13,15 +13,13 @@ def make_large_df(path='accept/', years=None):
 
     Parameters:
     -----------
-    path: string
-        path to csv files
+    path: string; path to csv files
     years: list of ints
 
 
     Returns:
     -----------
-    full_df: pandas dataframe
-        full dataframe of all data from csvs
+    full_df: pandas dataframe; full dataframe of all data from csvs
     """
     if years is not None:
         years = [str(y) for y in years]
@@ -36,13 +34,7 @@ def make_large_df(path='accept/', years=None):
                 continue
 
         print('reading file:', f)
-        temp_df = pd.read_csv(f, skiprows=0, header=1)
-        # if 'accept' in path:
-        #     # not sure why I originally dropped some columns...some have
-        #     # all nulls, others have very few non-nulls
-        #     # for now, keeping all columns
-        #     print('dropping')
-        #     temp_df.dropna(thresh=30, inplace=True)
+        temp_df = pd.read_csv(f, skiprows=0, header=1, low_memory=False)
 
         dfs.append(temp_df)
         files.append(f)
