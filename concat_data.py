@@ -107,6 +107,7 @@ def create_full_csv_files():
     # accept_df.to_csv('2016_data/LoanStats_2016.csv', index=False)
     # reject_df.to_csv('2016_data/RejectStats_2016.csv', index=False)
 
+
 def get_latest_year_qtr():
     """
     Gets latest year and quarter from files for naming combined csv.
@@ -127,8 +128,6 @@ def get_latest_year_qtr():
 
     latest_idx = np.argmax(sums)
     return yr_qtr[latest_idx]
-
-
 
 
 if __name__ == "__main__":
