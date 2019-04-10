@@ -73,7 +73,7 @@ def create_full_csv_files():
     """
     creates full csv files from individual files
     """
-
+    print('even on a fast computer, this takes 10+ minutes...')
     # this makes a dataframe with all csvs
     accept_df = make_large_df(path='accept/')
     reject_df = make_large_df(path='reject/')
