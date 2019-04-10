@@ -1,7 +1,7 @@
 from __future__ import print_function
 import pandas as pd
 import numpy as np
-from glob import iglob
+from glob import iglob, glob
 import feather as ft
 import re
 import os
@@ -94,12 +94,11 @@ def create_full_csv_files():
     if not os.path.exists('full_data'):
         os.mkdir('full_data')
 
-    # TODO: get latest file and use to change filename to latest
-    print('update code: get latest file and use in filenames')
-    # print('writing accepted file...')
-    # accept_df.to_csv('full_data/accepted_2007_to_2018Q3.csv.gz', index=False, compression='gzip')
-    # print('writing rejected file...')
-    # reject_df.to_csv('full_data/rejected_2007_to_2018Q3.csv.gz', index=False, compression='gzip')
+    latest_yr_qtr = get_latest_year_qtr()
+    print('writing accepted file...')
+    accept_df.to_csv('full_data/accepted_2007_to_{}.csv.gz'.format(latest_yr_qtr), index=False, compression='gzip')
+    print('writing rejected file...')
+    reject_df.to_csv('full_data/rejected_2007_to_{}.csv.gz'.format(latest_yr_qtr), index=False, compression='gzip')
 
     # makes a 2012-2016 dataframe for accepted, 2013-2016 for rejected
     # accept_df = make_large_df(path='accept/', years=[2016])
@@ -107,6 +106,30 @@ def create_full_csv_files():
     # print 'writing csvs...'
     # accept_df.to_csv('2016_data/LoanStats_2016.csv', index=False)
     # reject_df.to_csv('2016_data/RejectStats_2016.csv', index=False)
+
+def get_latest_year_qtr():
+    """
+    Gets latest year and quarter from files for naming combined csv.
+    Should be latest via OS timestamp, but this is more robust
+    just in case something is weird.
+    """
+    files = glob('accept/' + '*.csv')
+    yr_qtr = [fn.split('_')[-1].split('.')[0] for fn in files]
+    # add year to qtr and take largest
+    sums = []
+    for y in yr_qtr:
+        # skip early years
+        if y == 'securev1':
+            sums.append(0)
+            continue
+
+        sums.append(int(y[:4]) + int(y[-1]))
+
+    latest_idx = np.argmax(sums)
+    return yr_qtr[latest_idx]
+
+
+
 
 if __name__ == "__main__":
     create_full_csv_files()

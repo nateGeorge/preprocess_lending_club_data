@@ -9,10 +9,16 @@ code has not been written to run from any location.
 """
 import os
 import glob
+import time
 
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+
+import concat_data as cd
 
 MAIN_URL = "https://www.lendingclub.com/info/download-data.action"
+# change filepath to match your github repo
+FILEPATH = '/home/nate/github/preprocess_lending_club_data/'
 
 def setup_driver():
     """
@@ -34,7 +40,7 @@ def setup_driver():
     # downloading other stuff while this is running.
     # use 'firefox -P' from terminal to create a profile
     prof_paths = ['/home/nate/.mozilla/firefox/meghefu0.lendingclub',  # laptop
-                    '/home/nate/.mozilla/firefox/']  # desktop
+                    '/home/nate/.mozilla/firefox/vglvv9te.lendingclub']  # desktop
     # saves to downloads folder by default
     found_prof = False
     for p in prof_paths:
@@ -61,7 +67,8 @@ def setup_driver():
 def get_current_files():
     """
     Checks for files currently in 'accept' and 'reject' folders in main
-    repo directory.
+    repo directory.  Currently uses current path, so this should be run from within the
+    repo.
     """
     # first run unzip_files.sh to unzip and move any existing files in
     # main repo dir to the appropriate folders
@@ -96,6 +103,51 @@ def get_current_files():
     return accepted_files_web, rejected_files_web, accept_conv_dict, reject_conv_dict
 
 
+def log_in_to_lendingclub(driver):
+    # log in
+    # should set these as environment variables with your login credentials
+    uname = os.environ.get('lendingclub_uname')
+    passwd = os.environ.get('lendingclub_pass')
+    if uname is None or passwd is None:
+        print('set the environment variables lendingclub_uname and lendingclub_pass so you can log in to get the full data; exiting')
+        exit()
+
+    # hard xpath
+    # driver.find_element_by_xpath('/html/body/div[1]/header/div/div/div[6]/div/ul/li[3]/a')
+    # for some reason it's the second xpath object returned
+    driver.find_elements_by_xpath('//a[text()="Sign In"]')[1].click()
+
+    driver.find_element_by_name('email').send_keys(uname)
+    pword_element = driver.find_element_by_name('password')
+    pword_element.send_keys(passwd)
+    pword_element.send_keys(Keys.ENTER)
+    if driver.current_url == 'https://www.lendingclub.com/auth/login':
+        sec_code = input('enter security code sent to your email: ')
+        # check box so this doesn't happen again
+        driver.find_element_by_name('trust').click()
+        code_input = driver.find_element_by_name('code')
+        code_input.send_keys(sec_code)
+        code_input.send_keys(Keys.ENTER)
+
+    driver.get(MAIN_URL)
+
+
+def wait_for_data_download(filename=None):
+    """
+    waits for a file (filename) to exist; when it does, ends waiting
+    """
+    waited = 0
+    while not os.path.exists(filename):
+        time.sleep(0.3)
+        waited += 1
+        if waited == 1000:
+            return False
+
+    time.sleep(3)  # wait a bit longer to make sure it's fully downloaded;
+    # had issues with barchart not fully downloading
+
+    return True
+
 if __name__ == "__main__":
     # for headless browser mode with FF
     # http://scraping.pro/use-headless-firefox-scraping-linux/
@@ -103,9 +155,13 @@ if __name__ == "__main__":
     # from pyvirtualdisplay import Display
     # display = Display(visible=0, size=(800, 600))
     # display.start()
-
+    pass
+"""
     driver = setup_driver()
     driver.get(MAIN_URL)
+    log_in_to_lendingclub(driver)
+
+
     accepted_dropdown = driver.find_element_by_xpath('//*[@id="loanStatsDropdown"]')
     accepted_list = accepted_dropdown.text.split('\n')
 
@@ -117,46 +173,58 @@ if __name__ == "__main__":
     accepted_files_missing = len(set(accepted_list).difference(set(accepted_files_web)))
     rejected_files_missing = len(set(rejected_list).difference(set(rejected_files_web)))
 
-    print('TODO: login with credentials before downlodaing')
-    exit()
-    
+
     if accepted_files_missing > 0:
         print('missing', str(accepted_files_missing), 'accepted loan files; downloading...')
-        for a in accepted_list:
+        for a_file in accepted_list:
             # if we don't have the file, download it
-            if a not in accepted_files_web:
+            if a_file not in accepted_files_web:
                 for option in accepted_dropdown.find_elements_by_tag_name('option'):
-                    if option.text == a:
-                        print('downloading', a)
+                    if option.text == a_file:
+                        print('downloading', a_file)
                         # select option from dropdown
                         option.click()
                         # click download button
                         driver.find_element_by_xpath('//*[@id="currentLoanStatsFileName"]').click()
+                        #dl = wait_for_data_download(filename=FILEPATH + a_file)
+                        # moving files is taken care of in .sh scirpt
+                        #os.rename(FILEPATH + a_file, FILEPATH + 'accept/' + a_file)
                         break
 
+        # make sure last file has downloaded, give it a few seconds to be sure everything is done
+        dl = wait_for_data_download(filename=FILEPATH + a_file)
+        time.sleep(5)
         os.system('./unzip_files.sh')
 
     if rejected_files_missing > 0:
         print('missing', str(rejected_files_missing), 'rejected loan files; downloading...')
-        for r in rejected_list:
+        for r_file in rejected_list:
             # if we don't have the file, download it
-            if r not in rejected_files_web:
+            if r_file not in rejected_files_web:
                 for option in rejected_dropdown.find_elements_by_tag_name('option'):
-                    if option.text == r:
-                        print('downloading', r)
+                    if option.text == r_file:
+                        print('downloading', r_file)
                         # select option from dropdown
                         option.click()
                         # click download button
                         driver.find_element_by_xpath('//*[@id="currentRejectStatsFileName"]').click()
+                        #dl = wait_for_data_download(filename=FILEPATH + r_file)
+                        # moving files is taken care of in .sh scirpt
+                        #os.rename(FILEPATH + r_file, FILEPATH + 'accept/' + r_file)
                         break
 
+        # make sure last file has downloaded, give it a few seconds to be sure everything is done
+        dl = wait_for_data_download(filename=FILEPATH + r_file)
+        time.sleep(5)
         os.system('./unzip_files.sh')
 
+
+    cd.create_full_csv_files()
     # TODO/in-progress:
+    # create function to watch site and wait for new updates
     # recreate full .csv file and email/text notify of update
     # wrap main block code in functions
-    import concat_data
-    import notify
+    #import notify
 
-    concat_data.create_full_csv_files()
-    notify.send_messages()
+    #notify.send_messages()
+"""

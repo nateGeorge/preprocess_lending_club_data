@@ -15,6 +15,7 @@ if [ "$files" != "0" ]; then
     for f in Loan*; do mv $f accept/; done
     cd accept
     for f in *.zip; do unzip $f; rm $f; done
+    cd ..
 else
     echo "No accept files present"
 fi
@@ -22,8 +23,9 @@ fi
 files=$(ls Reject* 2> /dev/null | wc -l)
 if [ "$files" != "0" ]; then
     for f in Reject*; do mv $f reject/; done
-    cd ../reject
+    cd reject
     for f in *.zip; do unzip $f; rm $f; done
+    cd ..
 else
     echo "No reject files present"
 fi
