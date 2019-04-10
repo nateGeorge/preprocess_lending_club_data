@@ -132,36 +132,7 @@ def log_in_to_lendingclub(driver):
     driver.get(MAIN_URL)
 
 
-def wait_for_data_download(filename=None):
-    """
-    waits for a file (filename) to exist; when it does, ends waiting
-    """
-    waited = 0
-    while not os.path.exists(filename):
-        time.sleep(0.3)
-        waited += 1
-        if waited == 1000:
-            return False
-
-    time.sleep(3)  # wait a bit longer to make sure it's fully downloaded;
-    # had issues with barchart not fully downloading
-
-    return True
-
-if __name__ == "__main__":
-    # for headless browser mode with FF
-    # http://scraping.pro/use-headless-firefox-scraping-linux/
-    # have to first install xvfb
-    # from pyvirtualdisplay import Display
-    # display = Display(visible=0, size=(800, 600))
-    # display.start()
-    pass
-"""
-    driver = setup_driver()
-    driver.get(MAIN_URL)
-    log_in_to_lendingclub(driver)
-
-
+def download_files(driver):
     accepted_dropdown = driver.find_element_by_xpath('//*[@id="loanStatsDropdown"]')
     accepted_list = accepted_dropdown.text.split('\n')
 
@@ -219,6 +190,34 @@ if __name__ == "__main__":
         os.system('./unzip_files.sh')
 
 
+def wait_for_data_download(filename=None):
+    """
+    waits for a file (filename) to exist; when it does, ends waiting
+    """
+    waited = 0
+    while not os.path.exists(filename):
+        time.sleep(0.3)
+        waited += 1
+        if waited == 1000:
+            return False
+
+    time.sleep(3)  # wait a bit longer to make sure it's fully downloaded;
+    # had issues with barchart not fully downloading
+
+    return True
+
+if __name__ == "__main__":
+    # for headless browser mode with FF
+    # http://scraping.pro/use-headless-firefox-scraping-linux/
+    # have to first install xvfb
+    # from pyvirtualdisplay import Display
+    # display = Display(visible=0, size=(800, 600))
+    # display.start()
+    driver = setup_driver()
+    driver.get(MAIN_URL)
+    log_in_to_lendingclub(driver)
+    download_files(driver)
+
     cd.create_full_csv_files()
     # TODO/in-progress:
     # create function to watch site and wait for new updates
@@ -227,4 +226,3 @@ if __name__ == "__main__":
     #import notify
 
     #notify.send_messages()
-"""
