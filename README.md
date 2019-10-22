@@ -1,6 +1,11 @@
 # preprocess_lending_club_data
+Currently, lendingclub has changed their downloads and policy.  They now only have the accepted loans -- rejected loans were removed sometime in 2019.  They also have a scary copyright notice when you go to download the data.
+
 Pre-processes lending club loan data and concatenates into one large file.
 This was made for publishing the dataset on [Kaggle](http://www.kaggle.com).  The Kaggle dataset/kernels are [here](https://www.kaggle.com/wordsforthewise/lending-club).
+
+## Quickstart
+`python scrape_data.py`
 
 # Instructions for use
 This was all done on Ubuntu 16.0.2.  Other operating systems may or may not work.

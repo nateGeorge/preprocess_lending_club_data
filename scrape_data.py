@@ -18,7 +18,7 @@ import concat_data as cd
 
 MAIN_URL = "https://www.lendingclub.com/info/download-data.action"
 # change filepath to match your github repo
-FILEPATH = '/home/nate/github/preprocess_lending_club_data/'
+FILEPATH = os.getcwd()
 
 def setup_driver():
     """
@@ -34,23 +34,12 @@ def setup_driver():
     -----------
     driver: the set-up selenium webdriver
     """
-    # first set preferences so that all files will auto-download.
-    # a firefox profile needs to be setup where the downloads go to the github repo.
-    # downloading to the downloads folder is a bad idea in case you are also
-    # downloading other stuff while this is running.
-    # use 'firefox -P' from terminal to create a profile
-    prof_paths = ['/home/nate/.mozilla/firefox/meghefu0.lendingclub',  # laptop
-                    '/home/nate/.mozilla/firefox/vglvv9te.lendingclub']  # desktop
-    # saves to downloads folder by default
-    found_prof = False
-    for p in prof_paths:
-        if os.path.exists(p):
-            found_prof = True
-            profile = webdriver.FirefoxProfile(p)
+    # sets download location
 
-    if not found_prof:
-        print('set up firefox profile with download folder to github repo; then set profile path in setup_driver')
-        return None
+    profile = webdriver.FirefoxProfile()
+    profile.set_preference("browser.download.folderList", 2)
+    profile.set_preference("browser.download.manager.showWhenStarting", False)
+    profile.set_preference("browser.download.dir", FILEPATH)
 
     """
     dont remember where I found this, but it changes settings so FF
@@ -79,7 +68,7 @@ def get_current_files():
                         'LoanStats3b_securev1.csv': '2012 - 2013',
                         'LoanStats3c_securev1.csv': '2014',
                         'LoanStats3d_securev1.csv': '2015'}
-    accepted_files = glob.glob('accept/*.csv')
+    accepted_files = glob.glob(os.path.join(FILEPATH, 'accept/*.csv'))
     for a in accepted_files:
         if 'Q' in a:
             year_q = a.split('_')[-1].split('.')[0]
@@ -89,7 +78,7 @@ def get_current_files():
     reject_conv_dict = {'RejectStatsA.csv': '2007 - 2012',
                         'RejectStatsB.csv': '2013 - 2014',
                         'RejectStatsD.csv': '2015'}
-    rejected_files = glob.glob('reject/*.csv')
+    rejected_files = glob.glob(os.path.join(FILEPATH, 'reject/*.csv'))
     for a in rejected_files:
         if 'Q' in a:
             year_q = a.split('_')[-1].split('.')[0]
@@ -109,8 +98,10 @@ def log_in_to_lendingclub(driver):
     uname = os.environ.get('lendingclub_uname')
     passwd = os.environ.get('lendingclub_pass')
     if uname is None or passwd is None:
-        print('set the environment variables lendingclub_uname and lendingclub_pass so you can log in to get the full data; exiting')
-        exit()
+        print('Net the environment variables lendingclub_uname and lendingclub_pass for more automation.\n')
+        uname = input('Enter lendingclub username: ')
+        from getpass import getpass
+        passwd = getpass('Enter lendingclub password: ')
 
     # hard xpath
     # driver.find_element_by_xpath('/html/body/div[1]/header/div/div/div[6]/div/ul/li[3]/a')
@@ -122,8 +113,9 @@ def log_in_to_lendingclub(driver):
     pword_element.send_keys(passwd)
     pword_element.send_keys(Keys.ENTER)
     if driver.current_url == 'https://www.lendingclub.com/auth/login':
-        sec_code = input('enter security code sent to your email: ')
-        # check box so this doesn't happen again
+        sec_code = input('Enter security code sent to your email: ')
+        # check box for 'remember this device' so this doesn't happen again
+        # driver.find_element_by_xpath('/html/body/div[2]/div[2]/form[1]/label[2]/input').click()
         driver.find_element_by_name('trust').click()
         code_input = driver.find_element_by_name('code')
         code_input.send_keys(sec_code)
@@ -136,8 +128,9 @@ def download_files(driver):
     accepted_dropdown = driver.find_element_by_xpath('//*[@id="loanStatsDropdown"]')
     accepted_list = accepted_dropdown.text.split('\n')
 
-    rejected_dropdown = driver.find_element_by_xpath('//*[@id="rejectStatsDropdown"]')
-    rejected_list = rejected_dropdown.text.split('\n')
+    # rejected stats removed as of late 2019
+    # rejected_dropdown = driver.find_element_by_xpath('//*[@id="rejectStatsDropdown"]')
+    # rejected_list = rejected_dropdown.text.split('\n')
 
     accepted_files_web, rejected_files_web, accept_conv_dict, reject_conv_dict = get_current_files()
 
@@ -164,30 +157,32 @@ def download_files(driver):
 
         # make sure last file has downloaded, give it a few seconds to be sure everything is done
         dl = wait_for_data_download(filename=FILEPATH + a_file)
+        driver.find_element_by_xpath('//*[@id="currentLoanStatsFileName"]').click()
         time.sleep(5)
         os.system('./unzip_files.sh')
 
-    if rejected_files_missing > 0:
-        print('missing', str(rejected_files_missing), 'rejected loan files; downloading...')
-        for r_file in rejected_list:
-            # if we don't have the file, download it
-            if r_file not in rejected_files_web:
-                for option in rejected_dropdown.find_elements_by_tag_name('option'):
-                    if option.text == r_file:
-                        print('downloading', r_file)
-                        # select option from dropdown
-                        option.click()
-                        # click download button
-                        driver.find_element_by_xpath('//*[@id="currentRejectStatsFileName"]').click()
-                        #dl = wait_for_data_download(filename=FILEPATH + r_file)
-                        # moving files is taken care of in .sh scirpt
-                        #os.rename(FILEPATH + r_file, FILEPATH + 'accept/' + r_file)
-                        break
+    # rejected download removed as of late 2019
+    # if rejected_files_missing > 0:
+    #     print('missing', str(rejected_files_missing), 'rejected loan files; downloading...')
+    #     for r_file in rejected_list:
+    #         # if we don't have the file, download it
+    #         if r_file not in rejected_files_web:
+    #             for option in rejected_dropdown.find_elements_by_tag_name('option'):
+    #                 if option.text == r_file:
+    #                     print('downloading', r_file)
+    #                     # select option from dropdown
+    #                     option.click()
+    #                     # click download button
+    #                     driver.find_element_by_xpath('//*[@id="currentRejectStatsFileName"]').click()
+    #                     #dl = wait_for_data_download(filename=FILEPATH + r_file)
+    #                     # moving files is taken care of in .sh scirpt
+    #                     #os.rename(FILEPATH + r_file, FILEPATH + 'accept/' + r_file)
+    #                     break
 
         # make sure last file has downloaded, give it a few seconds to be sure everything is done
-        dl = wait_for_data_download(filename=FILEPATH + r_file)
-        time.sleep(5)
-        os.system('./unzip_files.sh')
+        # dl = wait_for_data_download(filename=FILEPATH + r_file)
+        # time.sleep(5)
+        # os.system('./unzip_files.sh')
 
 
 def wait_for_data_download(filename=None):
